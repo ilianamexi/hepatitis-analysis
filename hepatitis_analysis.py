@@ -155,7 +155,9 @@ def stage_correlation(df: pd.DataFrame) -> pd.DataFrame:
         ax.set_xticks(range(1, 5), ["Donor", "Hepatitis", "Fibrosis", "Cirrhosis"], fontsize=8.5)
         ax.set_yscale("log")
         ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:g}"))
-        ax.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+        # label the 2x and 5x minor ticks too, so narrow ranges (e.g. CHOL) still get numbers
+        ax.yaxis.set_minor_formatter(matplotlib.ticker.FuncFormatter(
+            lambda v, _: f"{v:g}" if f"{v:.0e}"[0] in "25" else ""))
         rho = out.set_index("biomarker").loc[m, "spearman_rho"]
         ax.set_title(f"{m}  (Spearman ρ = {rho:+.2f})")
     fig.suptitle("Biomarkers most related to disease stage (outliers hidden, log scale)", fontsize=12)
