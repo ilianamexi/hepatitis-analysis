@@ -1,0 +1,36 @@
+name: analysis
+
+# Tests on every push. The full analysis (downloads the UCI dataset) runs when started from
+# the Actions tab or when a commit message contains [run-analysis]; results are uploaded.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q tests
+
+  analysis:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-analysis]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python hepatitis_analysis.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: analysis-output
+          path: |
+            results/
+            figures/
